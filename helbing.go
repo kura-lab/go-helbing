@@ -9,3 +9,10 @@ type pedestrian struct {
 	X float64
 	Y float64
 }
+
+func newPedestrian() *pedestrian {
+	p := new(pedestrian)
+	p.X = 100
+	p.Y = 100
+	return p
+}
