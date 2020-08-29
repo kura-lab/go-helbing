@@ -6,4 +6,6 @@ import (
 
 type pedestrian struct {
 	pixel.Vec
+	X float64
+	Y float64
 }
