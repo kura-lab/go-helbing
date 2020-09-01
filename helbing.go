@@ -27,6 +27,17 @@ func newPedestrian() *pedestrian {
 	return p
 }
 
+func (p *pedestrian) update() {
+
+	if p.X > 200 {
+		p.X = 100
+		p.Y = 100
+	}
+
+	p.X = p.X + 1
+	p.Y = p.Y - 1
+}
+
 func main() {
 	seed, _ := crand.Int(crand.Reader, big.NewInt(math.MaxInt64))
 	rand.Seed(seed.Int64())
