@@ -8,6 +8,7 @@ import (
 	"math/rand"
 
 	"github.com/faiface/pixel"
+	"github.com/faiface/pixel/imdraw"
 )
 
 var pedestrians [1]*pedestrian
@@ -36,6 +37,17 @@ func (p *pedestrian) update() {
 
 	p.X = p.X + 1
 	p.Y = p.Y - 1
+}
+
+func (p *pedestrian) draw(imd *imdraw.IMDraw) {
+	pix := pixel.V(
+		p.X,
+		p.Y,
+	)
+
+	imd.Color = p.C
+	imd.Push(pix)
+	imd.Circle(5, 0)
 }
 
 func main() {
