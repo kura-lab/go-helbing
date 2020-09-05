@@ -14,7 +14,7 @@ import (
 
 const width, height = float64(1024), float64(512)
 
-var pedestrians [1]*pedestrian
+var pedestrians [8]*pedestrian
 
 type pedestrian struct {
 	pixel.Vec
@@ -64,7 +64,9 @@ func main() {
 	seed, _ := crand.Int(crand.Reader, big.NewInt(math.MaxInt64))
 	rand.Seed(seed.Int64())
 
-	pedestrians[0] = newPedestrian()
+	for i := 0; i < len(pedestrians); i++ {
+		pedestrians[i] = newPedestrian()
+	}
 
 	pixelgl.Run(func() {
 		win, err := pixelgl.NewWindow(pixelgl.WindowConfig{
