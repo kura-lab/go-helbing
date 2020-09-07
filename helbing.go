@@ -14,17 +14,29 @@ import (
 
 const width, height = float64(1024), float64(512)
 
-var pedestrians [8]*pedestrian
+const (
+	ti = 0.5
+	t  = 0.5
+)
+
+var Ai = math.Pow(2.0, 3)
+var Bi = 0.08
+var k1 = math.Pow(1.2, 5) // 1.2e5
+var k2 = math.Pow(2.4, 5) // 2.4e5
+
+var pedestrians [512]*pedestrian
 
 type pedestrian struct {
 	pixel.Vec
-	X                float64
-	Y                float64
+	stateCurrent     int
+	stateFuture      int
+	locationX        [2]float64
+	locationY        [2]float64
 	desiredVelocityX float64
 	desiredVelocityY float64
 	desiredVelocity  float64
-	velocityX        float64
-	velocityY        float64
+	velocityX        [2]float64
+	velocityY        [2]float64
 	weight           float64
 	bodyRadius       float64
 	C                color.RGBA
@@ -32,10 +44,16 @@ type pedestrian struct {
 
 func newPedestrian() *pedestrian {
 	p := new(pedestrian)
-	p.X = random(0, width)
-	p.Y = random(0, height)
+
+	p.stateCurrent = 0
+	p.stateFuture = 1
+
+	p.locationX[p.stateCurrent] = random(0, width)
+	p.locationY[p.stateCurrent] = random(0, height)
+
 	p.weight = 60
 	p.bodyRadius = 0.3
+
 	p.C = color.RGBA{157, 180, 255, 255}
 
 	var pi float64
@@ -56,27 +74,34 @@ func newPedestrian() *pedestrian {
 
 func (p *pedestrian) update() {
 
-	if p.X > width {
-		p.X = 0
-	} else if p.X < 0 {
-		p.X = width
+	if p.locationX[p.stateFuture] > width {
+		p.locationX[p.stateFuture] = 0
+	} else if p.locationX[p.stateFuture] < 0 {
+		p.locationX[p.stateFuture] = width
 	}
 
-	if p.Y > height {
-		p.Y = 0
-	} else if p.Y < 0 {
-		p.Y = height
+	if p.locationY[p.stateFuture] > height {
+		p.locationY[p.stateFuture] = 0
+	} else if p.locationY[p.stateFuture] < 0 {
+		p.locationY[p.stateFuture] = height
 	}
 
-	p.X = p.X + 1
-	p.Y = p.Y - 1
+	tmp := p.stateCurrent
+	p.stateCurrent = p.stateFuture
+	p.stateFuture = tmp
+	//p.X = p.X + 1
+	//p.Y = p.Y - 1
 }
 
 func (p *pedestrian) draw(imd *imdraw.IMDraw) {
 	pix := pixel.V(
-		width/2-p.X,
-		height/2-p.Y,
+		//width/2-p.X,
+		//height/2-p.Y,
+		width/2-p.locationX[p.stateCurrent],
+		height/2-p.locationY[p.stateCurrent],
 	)
+
+	fmt.Printf("x: %f, y:%f\n", p.locationX[p.stateCurrent], p.locationY[p.stateCurrent])
 
 	imd.Color = p.C
 	imd.Push(pix)
