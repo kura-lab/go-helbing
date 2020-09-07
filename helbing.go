@@ -18,16 +18,39 @@ var pedestrians [8]*pedestrian
 
 type pedestrian struct {
 	pixel.Vec
-	X float64
-	Y float64
-	C color.RGBA
+	X                float64
+	Y                float64
+	desiredVelocityX float64
+	desiredVelocityY float64
+	desiredVelocity  float64
+	velocityX        float64
+	velocityY        float64
+	weight           float64
+	bodyRadius       float64
+	C                color.RGBA
 }
 
 func newPedestrian() *pedestrian {
 	p := new(pedestrian)
 	p.X = random(0, width)
 	p.Y = random(0, height)
+	p.weight = 60
+	p.bodyRadius = 0.3
 	p.C = color.RGBA{157, 180, 255, 255}
+
+	var pi float64
+	if rand.Intn(2) == 0 {
+		pi = 0
+	} else {
+		pi = math.Pi
+	}
+
+	var distance float64
+	distance = rand.Float64()*0.6 + 1.2
+
+	p.desiredVelocityX = distance * math.Cos(pi)
+	p.desiredVelocityY = distance * math.Sin(pi)
+
 	return p
 }
 
