@@ -13,11 +13,12 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 )
 
-const width, height = float64(1024), float64(512)
+const width, height = float64(8), float64(4)
+const ratio = float64(100)
 
 const (
-	ti = 0.5
-	t  = 0.5
+	ti = 0.03
+	t  = 0.03
 )
 
 var Ai = math.Pow(2.0, 3)
@@ -25,7 +26,7 @@ var Bi = 0.08
 var k1 = math.Pow(1.2, 5) // 1.2e5
 var k2 = math.Pow(2.4, 5) // 2.4e5
 
-var pedestrians [512]*pedestrian
+var pedestrians [256]*pedestrian
 
 type pedestrian struct {
 	pixel.Vec
@@ -55,13 +56,13 @@ func newPedestrian() *pedestrian {
 	p.weight = 60
 	p.bodyRadius = 0.3
 
-	p.C = color.RGBA{157, 180, 255, 255}
-
 	var pi float64
 	if rand.Intn(2) == 0 {
 		pi = 0
+		p.C = color.RGBA{0, 255, 0, 255}
 	} else {
 		pi = math.Pi
+		p.C = color.RGBA{255, 0, 255, 255}
 	}
 
 	var distance float64
@@ -76,15 +77,15 @@ func newPedestrian() *pedestrian {
 func (p *pedestrian) update() {
 
 	if p.locationX[p.stateFuture] > width {
-		p.locationX[p.stateFuture] = 0
+		p.locationX[p.stateFuture] = p.locationX[p.stateFuture] - width
 	} else if p.locationX[p.stateFuture] < 0 {
-		p.locationX[p.stateFuture] = width
+		p.locationX[p.stateFuture] = width + p.locationX[p.stateFuture]
 	}
 
 	if p.locationY[p.stateFuture] > height {
-		p.locationY[p.stateFuture] = 0
+		p.locationY[p.stateFuture] = p.locationY[p.stateFuture] - height
 	} else if p.locationY[p.stateFuture] < 0 {
-		p.locationY[p.stateFuture] = height
+		p.locationY[p.stateFuture] = height + p.locationY[p.stateFuture]
 	}
 
 	tmp := p.stateCurrent
@@ -98,15 +99,15 @@ func (p *pedestrian) draw(imd *imdraw.IMDraw) {
 	pix := pixel.V(
 		//width/2-p.X,
 		//height/2-p.Y,
-		width/2-p.locationX[p.stateCurrent],
-		height/2-p.locationY[p.stateCurrent],
+		(width/2-p.locationX[p.stateCurrent])*ratio,
+		(height/2-p.locationY[p.stateCurrent])*ratio,
 	)
 
 	fmt.Printf("x: %f, y:%f\n", p.locationX[p.stateCurrent], p.locationY[p.stateCurrent])
 
 	imd.Color = p.C
 	imd.Push(pix)
-	imd.Circle(5, 0)
+	imd.Circle(p.bodyRadius*ratio/5, 1)
 }
 
 func main() {
@@ -119,7 +120,7 @@ func main() {
 
 	pixelgl.Run(func() {
 		win, err := pixelgl.NewWindow(pixelgl.WindowConfig{
-			Bounds:      pixel.R(0, 0, width, height),
+			Bounds:      pixel.R(0, 0, width*ratio, height*ratio),
 			VSync:       true,
 			Undecorated: false,
 		})
@@ -164,7 +165,7 @@ func main() {
 					disX := math.Abs(diffX)
 					disY := math.Abs(diffY)
 
-					if -disX >= -15 && -disX <= 15 && -disY >= -15 && -disY <= 15 {
+					if disX >= -15 && disX <= 15 && disY >= -15 && disY <= 15 {
 
 						dij := math.Sqrt(disX*disX + disY*disY)
 
