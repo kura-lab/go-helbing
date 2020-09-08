@@ -2,6 +2,7 @@ package main
 
 import (
 	crand "crypto/rand"
+	"fmt"
 	"image/color"
 	"math"
 	"math/big"
@@ -135,9 +136,91 @@ func main() {
 
 			imd.Clear()
 
-			for _, s := range pedestrians {
-				s.update()
-				s.draw(imd)
+			for i := 0; i < len(pedestrians); i++ {
+
+				pi := pedestrians[i]
+
+				m := pi.weight
+
+				var fX, fY float64
+
+				maX := m * (pi.desiredVelocityX - pi.velocityX[pi.stateCurrent]) / ti
+				maY := m * (pi.desiredVelocityY - pi.velocityY[pi.stateCurrent]) / ti
+
+				fX += maX
+				fY += maY
+
+				var fijX, fijY float64
+
+				for j := 0; j < len(pedestrians); j++ {
+					if i == j {
+						continue
+					}
+					pj := pedestrians[j]
+
+					diffX := pi.locationX[pi.stateCurrent] - pj.locationX[pj.stateCurrent]
+					diffY := pi.locationY[pi.stateCurrent] - pj.locationY[pj.stateCurrent]
+
+					disX := math.Abs(diffX)
+					disY := math.Abs(diffY)
+
+					if -disX >= -15 && -disX <= 15 && -disY >= -15 && -disY <= 15 {
+
+						dij := math.Sqrt(disX*disX + disY*disY)
+
+						nijX := diffX / dij
+						nijY := diffY / dij
+
+						rij := pi.bodyRadius + pj.bodyRadius
+
+						tijX := -nijY
+						tijY := nijX
+
+						dvjitX := (pj.velocityX[pj.stateCurrent] - pi.velocityX[pi.stateCurrent]) * tijX
+						dvjitY := (pj.velocityY[pj.stateCurrent] - pi.velocityY[pi.stateCurrent]) * tijY
+
+						funcG := rij - dij
+						if funcG < 0 {
+							funcG = 0
+						}
+
+						appr := (rij - dij) / Bi
+
+						fExp := Ai*math.Exp(appr) + k1*funcG
+
+						fijX += fExp*nijX + k2*funcG*dvjitX*tijX
+						fijY += fExp*nijY + k2*funcG*dvjitY*tijY
+					}
+				}
+
+				fX += fijX
+				fY += fijY
+
+				v := math.Sqrt(math.Pow(pi.desiredVelocityX, 2)+math.Pow(pi.desiredVelocityY, 2)) / t * m
+
+				fLength := math.Sqrt(math.Pow(fX, 2) + math.Pow(fY, 2))
+
+				if fX > v {
+					fX = fX / fLength * v
+				}
+				if fX < -v {
+					fX = fX / fLength * v
+				}
+				if fY > v {
+					fY = fY / fLength * v
+				}
+				if fY < -v {
+					fY = fY / fLength * v
+				}
+
+				pi.velocityX[pi.stateFuture] = (fX / m) * t
+				pi.velocityY[pi.stateFuture] = (fY / m) * t
+
+				pi.locationX[pi.stateFuture] = pi.locationX[pi.stateCurrent] + (fX/(2*m))*t*t
+				pi.locationY[pi.stateFuture] = pi.locationY[pi.stateCurrent] + (fY/(2*m))*t*t
+
+				pi.draw(imd)
+				pi.update()
 			}
 
 			win.Clear(color.Black)
