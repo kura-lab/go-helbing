@@ -21,9 +21,16 @@ const (
 	t  = 0.03
 )
 
+// Ai is a constant of repulsive interaction force.
 var Ai = math.Pow(2.0, 3)
+
+// Ai is a constant of repulsive interaction force.
 var Bi = 0.08
+
+// k1 is a constant of body force.
 var k1 = math.Pow(1.2, 5) // 1.2e5
+
+// k2 is a constant of sliding friction force.
 var k2 = math.Pow(2.4, 5) // 2.4e5
 
 var pedestrians [256]*pedestrian
