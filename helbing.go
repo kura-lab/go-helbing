@@ -24,7 +24,7 @@ const (
 // Ai is a constant of repulsive interaction force.
 var Ai = math.Pow(2.0, 3)
 
-// Ai is a constant of repulsive interaction force.
+// Bi is a constant of repulsive interaction force.
 var Bi = 0.08
 
 // k1 is a constant of body force.
